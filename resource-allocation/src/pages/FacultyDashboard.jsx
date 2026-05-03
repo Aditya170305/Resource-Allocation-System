@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const NAV_ITEMS = [
   { label: "Dashboard",        icon: HomeIcon,        path: "/faculty-dashboard" },
-  { label: "Browse Resources", icon: SearchIcon,      path: "/browse-resources" },
+  { label: "Show Resources", icon: SearchIcon,      path: "/browse-resources" },
   { label: "My Requests",      icon: RequestsIcon,    path: "/my-requests" },
   { label: "Profile",          icon: ProfileIcon,     path: "/profile" },
   { label: "Logout",           icon: LogoutIcon,      path: "/login" },
@@ -36,8 +36,11 @@ function FacultyDashboard() {
 
   const handleNav = (item) => {
     setActiveNav(item.label);
+    if (item.label === "Dashboard") navigate("/faculty-dashboard");
     if (item.label === "My Requests") navigate("/my-requests");
     if (item.label === "Logout") navigate(item.path);
+    if (item.label == "Show Resources") navigate("/show-resources");
+
   };
 
   return (

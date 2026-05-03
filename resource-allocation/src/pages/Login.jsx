@@ -36,7 +36,7 @@ function Login() {
       // Ensure the strings match exactly what is in your MySQL Database
       if (user.role === "Faculty") {
         navigate("/faculty-dashboard");
-      } else if (user.role === "Student") {
+      } else if (user.role === "Admin") {
         navigate("/student-dashboard");
       } else if (user.role === "HOD") {
         navigate("/hod-dashboard");
@@ -109,7 +109,7 @@ function Login() {
               <label>Role</label>
               <select name="role" onChange={handleChange} required>
                 <option value="">Select your role</option>
-                <option value="Student">Student</option>
+                <option value="Student">Admin</option>
                 <option value="Faculty">Faculty</option>
                 <option value="HOD">HOD</option>
               </select>

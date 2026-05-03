@@ -5,10 +5,11 @@ import { useNavigate } from "react-router-dom";
 /* ─── Nav ─────────────────────────────────────── */
 const NAV_ITEMS = [
   { label: "Dashboard",        Icon: HomeIcon      },
-  { label: "Booking Requests", Icon: RequestsIcon  },
+  // { label: "Booking Requests", Icon: RequestsIcon  },
   { label: "All Bookings",     Icon: BookingsIcon  },
+  { label : "Upload Time Table" ,  Icon : UploadNavIcon },
   { label: "Resources",        Icon: ResourcesIcon },
-  { label: "Reports",          Icon: ReportsIcon   },
+  // { label: "Reports",          Icon: ReportsIcon  },
   { label: "Profile",          Icon: ProfileIcon   },
   { label: "Logout",           Icon: LogoutIcon    },
 ];
@@ -134,6 +135,8 @@ export default function HodResources() {
     if (label === "Dashboard")        navigate("/hod-dashboard");
     if (label === "All Bookings")     navigate("/hod-all-bookings");
     if (label === "Booking Requests") navigate("/hod-booking-requests");
+    if (label === "Resources")        navigate("/hod-resources");
+    if (label === "Upload Time Table") navigate("/hod-upload-timetable");
   };
 
   const showToast = (msg, type = "success") => {
@@ -643,6 +646,7 @@ export default function HodResources() {
 function GridIcon()      { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" fill="currentColor"/><rect x="14" y="3" width="7" height="7" rx="1" fill="currentColor"/><rect x="3" y="14" width="7" height="7" rx="1" fill="currentColor"/><rect x="14" y="14" width="7" height="7" rx="1" fill="currentColor"/></svg>; }
 function HomeIcon()      { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>; }
 function RequestsIcon()  { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>; }
+function UploadNavIcon()   { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>; }
 function BookingsIcon()  { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>; }
 function ResourcesIcon() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>; }
 function ReportsIcon()   { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>; }

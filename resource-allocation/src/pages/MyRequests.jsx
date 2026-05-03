@@ -87,7 +87,7 @@ const TIME_SLOTS = [
 
 const NAV_ITEMS = [
   { label: "Dashboard",        Icon: HomeIcon    },
-  { label: "Browse Resources", Icon: SearchIcon  },
+  { label: "Show Resources", Icon: SearchIcon  },
 //   { label: "My Bookings",      Icon: CalendarIcon },
   { label: "My Requests",      Icon: RequestIcon  },
   { label: "Profile",          Icon: ProfileIcon  },
@@ -144,6 +144,7 @@ export default function MyRequests() {
     if (item.label === "Logout")    navigate("/login");
     if (item.label === "Dashboard") navigate("/faculty-dashboard");
     if (item.label === "My Requests") navigate("/my-requests");
+    if (item.label === "Show Resources") navigate("/show-resources");
   };
 
   const handleFormChange = (e) => {

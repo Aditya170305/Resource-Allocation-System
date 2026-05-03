@@ -5,10 +5,11 @@ import { useNavigate } from "react-router-dom";
 /* ─── Nav ─────────────────────────────────────── */
 const NAV_ITEMS = [
   { label: "Dashboard",        Icon: HomeIcon,      path: "/hod-dashboard"       },
-  { label: "Booking Requests", Icon: RequestsIcon,  path: "/hod-booking-requests" },
+  // { label: "Booking Requests", Icon: RequestsIcon,  path: "/hod-booking-requests" },
   { label: "All Bookings",     Icon: BookingsIcon,  path: "/hod-all-bookings"     },
+  { label : "Upload Time Table",  Icon : UploadNavIcon,  path: "/hod-upload-timetable" },
   { label: "Resources",        Icon: ResourcesIcon, path: "/hod-resources"        },
-  { label: "Reports",          Icon: ReportsIcon,   path: "/hod-reports"          },
+  // { label: "Reports",          Icon: ReportsIcon,   path: "/hod-reports"          },
   { label: "Profile",          Icon: ProfileIcon,   path: "/hod-profile"          },
   { label: "Logout",           Icon: LogoutIcon,    path: "/login"                },
 ];
@@ -43,7 +44,8 @@ export default function HodDashboard() {
     setActiveNav(item.label);
     if (item.label == "All Bookings") navigate("/hod-all-bookings");
     if (item.label == "Resources") navigate("/hod-resources");
-    // if (item.label == "Reports") navigate("/hod-reports"); 
+    // if (item.label == "Reports") navigate("/hod-reports");
+    if(item.label == "Upload Time Table") navigate("/hod-upload-timetable");
     if (item.label === "Logout") navigate(item.path);
   };
 
@@ -256,6 +258,7 @@ function GridIcon() {
 function HomeIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>;
 }
+function UploadNavIcon()   { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>; }
 function RequestsIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>;
 }

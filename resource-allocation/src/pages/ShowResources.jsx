@@ -98,6 +98,14 @@ export default function ResourceCalendar() {
   const details = RESOURCE_DETAILS[resource];
   const events  = ALL_EVENTS; // in a real app, filter by resource
 
+  const handleNav = (item) => {
+    setActiveNav(item.label);
+    if (item.label === "Dashboard") navigate("/faculty-dashboard");
+    if (item.label === "My Requests") navigate("/my-requests");
+    if (item.label === "Logout") navigate(item.path);
+    if (item.label == "Show Resources") navigate("/show-resources");
+
+  };
   return (
     <div className="rc-root">
 
