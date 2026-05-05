@@ -43,7 +43,7 @@ public class UserController {
     public ResponseEntity<?> loginUser(@RequestBody User loginData) {
         try {
             // We only need email and password from loginData
-            User authenticatedUser = loginService.authenticate(loginData.getEmail(), loginData.getPassword());
+            User authenticatedUser = loginService.authenticate(loginData.getUsername(), loginData.getPassword());
 
             // Return the full user object (including role) to React
             return ResponseEntity.ok(authenticatedUser);

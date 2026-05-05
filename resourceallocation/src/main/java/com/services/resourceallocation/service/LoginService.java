@@ -14,9 +14,9 @@ public class LoginService {
     @Autowired
     private UserRepository userRepository;
 
-    public User authenticate(String email, String password) throws Exception {
+    public User authenticate(String username, String password) throws Exception {
         // 1. Search for the user by email
-        Optional<User> userOpt = userRepository.findByEmail(email);
+        Optional<User> userOpt = userRepository.findByUsername(username);
 
         // 2. Check if user exists
         if (userOpt.isEmpty()) {

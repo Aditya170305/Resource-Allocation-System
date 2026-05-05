@@ -9,7 +9,7 @@ function Login() {
 
   // 1. State for Login Data
   const [loginData, setLoginData] = useState({
-    email: "",
+    username: "",
     password: "",
     role: "" // This helps us verify they selected the right role
   });
@@ -25,7 +25,7 @@ function Login() {
     try {
       // Calling your Spring Boot @PostMapping("/login")
       const response = await axios.post("http://localhost:8080/api/login", {
-        email: loginData.email,
+        username: loginData.username,
         password: loginData.password
       });
 
@@ -76,11 +76,11 @@ function Login() {
 
           <form className="login-form" onSubmit={handleLogin}>
             <div className="input-group">
-              <label>Email Address</label>
+              <label>Username </label>
               <input 
-                type="email" 
-                name="email"
-                placeholder="Enter your email" 
+                type="text" 
+                name="username"
+                placeholder="Enter your username" 
                 onChange={handleChange}
                 required 
               />

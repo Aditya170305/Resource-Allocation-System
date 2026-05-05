@@ -14,7 +14,7 @@ const WEEK_DAYS = [
   { date: "27 May", day: "Tue", idx: 3 },
   { date: "28 May", day: "Wed", idx: 4 },
   { date: "29 May", day: "Thu", idx: 5 },
-  { date: "30 May", day: "Fri", idx: 6 },
+  // { date: "30 May", day: "Fri", idx: 6 },
 ];
 
 const RESOURCES = [
@@ -51,8 +51,8 @@ const ALL_EVENTS = [
   { dayIdx: 5, start: "11:00", end: "13:00", type: "booked",    name: "Dr. David Lee",     activity: "Project Work"    },
   { dayIdx: 5, start: "15:00", end: "17:00", type: "available" },
   // 30 May Fri
-  { dayIdx: 6, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Sarah Wilson",  activity: "Seminar"         },
-  { dayIdx: 6, start: "14:00", end: "16:00", type: "available" },
+  // { dayIdx: 6, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Sarah Wilson",  activity: "Seminar"         },
+  // { dayIdx: 6, start: "14:00", end: "16:00", type: "available" },
 ];
 
 /* ─── Helpers ────────────────────────────────────── */
@@ -101,9 +101,7 @@ export default function ResourceCalendar() {
   const handleNav = (item) => {
     setActiveNav(item.label);
     if (item.label === "Dashboard") navigate("/faculty-dashboard");
-    if (item.label === "My Requests") navigate("/my-requests");
     if (item.label === "Logout") navigate(item.path);
-    if (item.label == "Show Resources") navigate("/show-resources");
 
   };
   return (
@@ -124,6 +122,9 @@ export default function ResourceCalendar() {
                 setActiveNav(label);
                 if (label === "Logout")    navigate("/login");
                 if (label === "Dashboard") navigate("/faculty-dashboard");
+                if (label === "My Requests") navigate("/my-requests");
+                if (label == "Show Resources") navigate("/show-resources");
+
               }}
             >
               <span className="rc-nav-icon"><Icon /></span>
