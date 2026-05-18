@@ -8,51 +8,79 @@ const BASE_HOUR   = 8;  // 08:00 AM
 const HOURS = [8,9,10,11,12,13,14,15,16,17,18]; // labels 08:00 → 06:00 PM
 
 const WEEK_DAYS = [
-  { date: "24 May", day: "Sat", idx: 0 },
-  { date: "25 May", day: "Sun", idx: 1 },
-  { date: "26 May", day: "Mon", idx: 2 },
-  { date: "27 May", day: "Tue", idx: 3 },
-  { date: "28 May", day: "Wed", idx: 4 },
-  { date: "29 May", day: "Thu", idx: 5 },
-  { date: "30 May", day: "Fri", idx: 6 },
+  { lecture: "Lecture - 1", idx: 0 },
+  { lecture: "Lecture - 2", idx: 1 },
+  { lecture: "Lecture - 3", idx: 2 },
+  { lecture: "Lecture - 4", idx: 3 },
+  { lecture: "Lecture - 5", idx: 4 },
+  { lecture: "Lecture - 6", idx: 5 },
 ];
 
-const RESOURCES = [
-  "Computer Lab 1",
-  "Seminar Hall",
-  "Physics Lab",
-  "Smart Classroom 1",
-];
+/* ─── Category → Resources map ──────────────────── */
+const CATEGORIES = ["Labs", "Halls", "Classrooms"];
 
-const RESOURCE_DETAILS = {
-  "Computer Lab 1":    { type: "Computer Laboratory", capacity: "40 Students", location: "Block A, Level 2", kind: "Lab",       amenities: "Wi-Fi, Projector, AC" },
-  "Seminar Hall":      { type: "Seminar Hall",         capacity: "80 Students", location: "Block B, Level 1", kind: "Hall",      amenities: "Wi-Fi, Projector, AC, Mic" },
-  "Physics Lab":       { type: "Science Laboratory",   capacity: "30 Students", location: "Block C, Level 2", kind: "Lab",       amenities: "Equipment, AC" },
-  "Smart Classroom 1": { type: "Smart Classroom",      capacity: "60 Students", location: "Block A, Level 3", kind: "Classroom", amenities: "Smart Board, Wi-Fi, AC" },
+const CATEGORY_RESOURCES = {
+  Labs: [
+    "Computer Lab 1",
+    "Computer Lab 2",
+    "Physics Lab",
+    "Chemistry Lab",
+  ],
+  Halls: [
+    "Seminar Hall",
+    "Conference Room",
+    "Auditorium",
+  ],
+  Classrooms: [
+    "Smart Classroom 1",
+    "Smart Classroom 2",
+    "Class - 101",
+    "Class - 102",
+    "Class - 103",
+  ],
 };
 
-/* dayIdx 0=Sat … 6=Fri */
+/* flat list used for fallback */
+const RESOURCES = Object.values(CATEGORY_RESOURCES).flat();
+
+const RESOURCE_DETAILS = {
+  "Computer Lab 1":    { type: "Computer Laboratory", capacity: "40 Students", location: "Block A, Level 2", kind: "Lab",       amenities: "Wi-Fi, Projector, AC, 40 PCs"    },
+  "Computer Lab 2":    { type: "Computer Laboratory", capacity: "40 Students", location: "Block A, Level 3", kind: "Lab",       amenities: "Wi-Fi, Projector, AC, 40 PCs"    },
+  "Physics Lab":       { type: "Science Laboratory",   capacity: "30 Students", location: "Block C, Level 2", kind: "Lab",       amenities: "Equipment, AC, Safety Kit"        },
+  "Chemistry Lab":     { type: "Science Laboratory",   capacity: "30 Students", location: "Block C, Level 1", kind: "Lab",       amenities: "Fume Hood, Equipment, AC"         },
+  "Seminar Hall":      { type: "Seminar Hall",          capacity: "80 Students", location: "Block B, Level 1", kind: "Hall",      amenities: "Wi-Fi, Projector, AC, Mic System" },
+  "Conference Room":   { type: "Conference Room",       capacity: "20 People",   location: "Block B, Level 2", kind: "Hall",      amenities: "Wi-Fi, Projector, AC, Video Conf" },
+  "Auditorium":        { type: "Auditorium",            capacity: "300 People",  location: "Block D, Level 1", kind: "Hall",      amenities: "Stage, Sound System, AC"          },
+  "Smart Classroom 1": { type: "Smart Classroom",       capacity: "60 Students", location: "Block A, Level 3", kind: "Classroom", amenities: "Smart Board, Wi-Fi, AC"           },
+  "Smart Classroom 2": { type: "Smart Classroom",       capacity: "60 Students", location: "Block A, Level 4", kind: "Classroom", amenities: "Smart Board, Wi-Fi, AC"           },
+  "Class - 101":       { type: "Classroom",             capacity: "50 Students", location: "Block E, Level 1", kind: "Classroom", amenities: "Projector, Fan, Whiteboard"       },
+  "Class - 102":       { type: "Classroom",             capacity: "50 Students", location: "Block E, Level 1", kind: "Classroom", amenities: "Projector, Fan, Whiteboard"       },
+  "Class - 103":       { type: "Classroom",             capacity: "50 Students", location: "Block E, Level 2", kind: "Classroom", amenities: "Projector, AC, Whiteboard"        },
+};
+
+/* lectureIdx 0=Lecture-1 … 5=Lecture-6 */
 const ALL_EVENTS = [
-  // 25 May Sun
-  { dayIdx: 1, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Sarah Wilson",  activity: "Practical Class" },
-  // 26 May Mon
-  { dayIdx: 2, start: "08:00", end: "10:00", type: "available" },
-  { dayIdx: 2, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Michael Brown", activity: "Lab Session"     },
-  { dayIdx: 2, start: "14:00", end: "16:00", type: "available" },
-  // 27 May Tue
-  { dayIdx: 3, start: "08:00", end: "10:00", type: "pending"   },
-  { dayIdx: 3, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Emily Davis",   activity: "Practical Class" },
-  { dayIdx: 3, start: "14:00", end: "16:00", type: "booked",    name: "Prof. John Smith",  activity: "Workshop"        },
-  // 28 May Wed
-  { dayIdx: 4, start: "09:00", end: "12:00", type: "booked",    name: "Dr. Emily Davis",   activity: "Practical Class" },
-  { dayIdx: 4, start: "13:00", end: "15:00", type: "available" },
-  // 29 May Thu
-  { dayIdx: 5, start: "08:00", end: "10:00", type: "available" },
-  { dayIdx: 5, start: "11:00", end: "13:00", type: "booked",    name: "Dr. David Lee",     activity: "Project Work"    },
-  { dayIdx: 5, start: "15:00", end: "17:00", type: "available" },
-  // 30 May Fri
-  { dayIdx: 6, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Sarah Wilson",  activity: "Seminar"         },
-  { dayIdx: 6, start: "14:00", end: "16:00", type: "available" },
+  // Lecture - 1
+  { dayIdx: 0, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Sarah Wilson",  activity: "Practical Class" },
+  { dayIdx: 0, start: "13:00", end: "15:00", type: "available" },
+  // Lecture - 2
+  { dayIdx: 1, start: "08:00", end: "10:00", type: "available" },
+  { dayIdx: 1, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Michael Brown", activity: "Lab Session"     },
+  { dayIdx: 1, start: "14:00", end: "16:00", type: "available" },
+  // Lecture - 3
+  { dayIdx: 2, start: "08:00", end: "10:00", type: "pending"   },
+  { dayIdx: 2, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Emily Davis",   activity: "Practical Class" },
+  { dayIdx: 2, start: "14:00", end: "16:00", type: "booked",    name: "Prof. John Smith",  activity: "Workshop"        },
+  // Lecture - 4
+  { dayIdx: 3, start: "09:00", end: "12:00", type: "booked",    name: "Dr. Emily Davis",   activity: "Practical Class" },
+  { dayIdx: 3, start: "13:00", end: "15:00", type: "available" },
+  // Lecture - 5
+  { dayIdx: 4, start: "08:00", end: "10:00", type: "available" },
+  { dayIdx: 4, start: "11:00", end: "13:00", type: "booked",    name: "Dr. David Lee",     activity: "Project Work"    },
+  { dayIdx: 4, start: "15:00", end: "17:00", type: "available" },
+  // Lecture - 6
+  { dayIdx: 5, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Sarah Wilson",  activity: "Seminar"         },
+  { dayIdx: 5, start: "14:00", end: "16:00", type: "available" },
 ];
 
 /* ─── Helpers ────────────────────────────────────── */
@@ -91,12 +119,20 @@ const NAV = [
 ═══════════════════════════════════════════════════ */
 export default function ResourceCalendar() {
   const navigate  = useNavigate();
-  const [activeNav, setActiveNav]   = useState("Show Resources");
-  const [resource, setResource]     = useState("Computer Lab 1");
-  const [viewMode, setViewMode]     = useState("week"); // "week" | "day"
+  const [activeNav,  setActiveNav]  = useState("Show Resources");
+  const [category,   setCategory]   = useState("Labs");
+  const [resource,   setResource]   = useState("Computer Lab 1");
+  const [viewMode,   setViewMode]   = useState("week");
 
-  const details = RESOURCE_DETAILS[resource];
-  const events  = ALL_EVENTS; // in a real app, filter by resource
+  /* when category changes, auto-select first resource in that category */
+  const handleCategoryChange = (cat) => {
+    setCategory(cat);
+    setResource(CATEGORY_RESOURCES[cat][0]);
+  };
+
+  const resourcesInCategory = CATEGORY_RESOURCES[category];
+  const details = RESOURCE_DETAILS[resource] || RESOURCE_DETAILS["Computer Lab 1"];
+  const events  = ALL_EVENTS;
 
   return (
     <div className="rc-root">
@@ -157,15 +193,35 @@ export default function ResourceCalendar() {
 
         {/* Controls bar */}
         <div className="rc-controls">
+
+          {/* ── Filter 1: Category ── */}
+          <div className="rc-resource-select-wrap">
+            <label className="rc-control-label">Category</label>
+            <div className="rc-select-box">
+              <select
+                className="rc-select"
+                value={category}
+                onChange={e => handleCategoryChange(e.target.value)}
+              >
+                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+              <ChevronDownIcon />
+            </div>
+          </div>
+
+          {/* ── Divider arrow ── */}
+          <span className="rc-filter-arrow"><ChevronRightIcon /></span>
+
+          {/* ── Filter 2: Specific Resource ── */}
           <div className="rc-resource-select-wrap">
             <label className="rc-control-label">Resource</label>
             <div className="rc-select-box">
               <select
-                className="rc-select"
+                className="rc-select rc-select--resource"
                 value={resource}
                 onChange={e => setResource(e.target.value)}
               >
-                {RESOURCES.map(r => <option key={r}>{r}</option>)}
+                {resourcesInCategory.map(r => <option key={r}>{r}</option>)}
               </select>
               <ChevronDownIcon />
             </div>
@@ -177,7 +233,7 @@ export default function ResourceCalendar() {
             <button className="rc-nav-arrow"><ChevronRightIcon /></button>
           </div>
 
-          <span className="rc-date-range">24 May – 30 May 2025</span>
+          <span className="rc-date-range">Lecture 1 – Lecture 6</span>
 
           <div className="rc-view-toggle">
             <button
@@ -197,13 +253,12 @@ export default function ResourceCalendar() {
           {/* ── Calendar grid ── */}
           <div className="rc-calendar">
 
-            {/* Day headers */}
+            {/* Lecture headers */}
             <div className="rc-col-headers">
               <div className="rc-time-spacer" />
               {WEEK_DAYS.map(d => (
                 <div key={d.idx} className="rc-col-header">
-                  <span className="rc-col-date">{d.date}</span>
-                  <span className="rc-col-day">{d.day}</span>
+                  <span className="rc-col-date">{d.lecture}</span>
                 </div>
               ))}
             </div>

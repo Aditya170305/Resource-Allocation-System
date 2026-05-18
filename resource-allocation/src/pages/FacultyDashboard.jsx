@@ -12,22 +12,21 @@ const NAV_ITEMS = [
 
 const RESOURCES = ["Computer Lab 1", "Seminar Hall", "Physics Lab", "Smart Classroom 1"];
 
-const WEEK_DATES = [
-  { date: "24 May", day: "Sat" },
-  { date: "25 May", day: "Sun" },
-  { date: "26 May", day: "Mon" },
-  { date: "27 May", day: "Tue" },
-  { date: "28 May", day: "Wed" },
-  { date: "29 May", day: "Thu" },
-  { date: "30 May", day: "Fri" },
+const LECTURES = [
+  { label: "Lecture - 1" },
+  { label: "Lecture - 2" },
+  { label: "Lecture - 3" },
+  { label: "Lecture - 4" },
+  { label: "Lecture - 5" },
+  { label: "Lecture - 6" },
 ];
 
 // status: "Empty" | "Booked" | "Pending"
 const AVAILABILITY = {
-  "Computer Lab 1":    ["Booked",  "Pending", "Empty",  "Booked",  "Empty",  "Pending", "Empty"],
-  "Seminar Hall":      ["Empty",   "Empty",   "Booked", "Pending", "Empty",  "Booked",  "Empty"],
-  "Physics Lab":       ["Booked",  "Pending", "Pending","Empty",   "Booked", "Empty",   "Empty"],
-  "Smart Classroom 1": ["Empty",   "Booked",  "Empty",  "Empty",   "Pending","Empty",   "Booked"],
+  "Computer Lab 1":    ["Booked",  "Empty",   "Booked",  "Pending", "Empty",   "Booked" ],
+  "Seminar Hall":      ["Empty",   "Booked",  "Pending", "Empty",   "Booked",  "Empty"  ],
+  "Physics Lab":       ["Pending", "Booked",  "Empty",   "Booked",  "Pending", "Empty"  ],
+  "Smart Classroom 1": ["Empty",   "Pending", "Booked",  "Empty",   "Booked",  "Pending"],
 };
 
 function FacultyDashboard() {
@@ -40,7 +39,7 @@ function FacultyDashboard() {
     if (item.label === "My Requests") navigate("/my-requests");
     if (item.label === "Logout") navigate(item.path);
     if (item.label == "Show Resources") navigate("/show-resources");
-
+    
   };
 
   return (
@@ -124,16 +123,16 @@ function FacultyDashboard() {
           />
         </section>
 
-        {/* Availability Overview */}
+        {/* Today's Schedule */}
         <section className="fd-avail-section">
           <div className="fd-avail-header">
             <div>
-              <h2 className="fd-avail-title">Availability Overview</h2>
-              <p className="fd-avail-sub">View resource availability for the week.</p>
+              <h2 className="fd-avail-title">Today's Class Schedule</h2>
+              <p className="fd-avail-sub">Resource availability for today's lectures.</p>
             </div>
             <button className="fd-view-calendar-btn" onClick={() => navigate("/resource-calendar")}>
-                <CalendarIcon />
-                View Calendar
+              <CalendarIcon />
+              View Calendar
             </button>
           </div>
 
@@ -142,10 +141,9 @@ function FacultyDashboard() {
               <thead>
                 <tr>
                   <th className="fd-th-resource">Resource</th>
-                  {WEEK_DATES.map((d) => (
-                    <th key={d.date} className="fd-th-date">
-                      <span className="fd-date-label">{d.date}</span>
-                      <span className="fd-day-label">{d.day}</span>
+                  {LECTURES.map((l) => (
+                    <th key={l.label} className="fd-th-date">
+                      <span className="fd-date-label">{l.label}</span>
                     </th>
                   ))}
                 </tr>
@@ -194,7 +192,7 @@ function StatCard({ icon, iconBg, value, label, sub }) {
 }
 
 /* ── SVG Icons ── */
-export function GridIcon() {
+function GridIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="3" width="7" height="7" rx="1" fill="currentColor"/>
@@ -204,7 +202,7 @@ export function GridIcon() {
     </svg>
   );
 }
-export function HomeIcon() {
+function HomeIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
@@ -212,7 +210,7 @@ export function HomeIcon() {
     </svg>
   );
 }
-export function SearchIcon() {
+function SearchIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <circle cx="11" cy="11" r="7"/>
@@ -220,7 +218,7 @@ export function SearchIcon() {
     </svg>
   );
 }
-export function RequestsIcon() {
+function RequestsIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
@@ -229,7 +227,7 @@ export function RequestsIcon() {
     </svg>
   );
 }
-export function ProfileIcon() {
+function ProfileIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <circle cx="12" cy="8" r="4"/>
@@ -237,7 +235,7 @@ export function ProfileIcon() {
     </svg>
   );
 }
-export function LogoutIcon() {
+function LogoutIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
@@ -246,7 +244,7 @@ export function LogoutIcon() {
     </svg>
   );
 }
-export function BellIcon() {
+function BellIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -254,14 +252,14 @@ export function BellIcon() {
     </svg>
   );
 }
-export function ChevronIcon() {
+function ChevronIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <polyline points="6 9 12 15 18 9"/>
     </svg>
   );
 }
-export function CalendarIcon() {
+function CalendarIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <rect x="3" y="4" width="18" height="18" rx="2"/>
@@ -271,7 +269,7 @@ export function CalendarIcon() {
     </svg>
   );
 }
-export function BookingCardIcon() {
+function BookingCardIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.8">
       <rect x="3" y="4" width="18" height="18" rx="2"/>
@@ -281,7 +279,7 @@ export function BookingCardIcon() {
     </svg>
   );
 }
-export function RequestCardIcon() {
+function RequestCardIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.8">
       <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
@@ -290,7 +288,7 @@ export function RequestCardIcon() {
     </svg>
   );
 }
-export function ApprovedCardIcon() {
+function ApprovedCardIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="1.8">
       <circle cx="12" cy="12" r="9"/>
@@ -298,7 +296,7 @@ export function ApprovedCardIcon() {
     </svg>
   );
 }
-export function CancelledCardIcon() {
+function CancelledCardIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.8">
       <circle cx="12" cy="12" r="9"/>

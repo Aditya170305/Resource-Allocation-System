@@ -1,58 +1,24 @@
-import React, { useState } from "react";
-import "./ResourceCalendar.css";
+import React, { useState, useEffect } from "react";
+import "./ShowResources.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 /* ─── Constants ─────────────────────────────────── */
-const HOUR_HEIGHT = 64; // px per hour
-const BASE_HOUR   = 8;  // 08:00 AM
-const HOURS = [8,9,10,11,12,13,14,15,16,17,18]; // labels 08:00 → 06:00 PM
+const HOUR_HEIGHT = 64;
+const BASE_HOUR   = 8;
+const HOURS = [8,9,10,11,12,13,14,15,16,17,18];
+
+const API_BASE = "http://localhost:8080/api";
+
+const CATEGORIES = ["Labs", "Halls", "Classrooms"];
 
 const WEEK_DAYS = [
-  { date: "24 May", day: "Sat", idx: 0 },
-  { date: "25 May", day: "Sun", idx: 1 },
-  { date: "26 May", day: "Mon", idx: 2 },
-  { date: "27 May", day: "Tue", idx: 3 },
-  { date: "28 May", day: "Wed", idx: 4 },
-  { date: "29 May", day: "Thu", idx: 5 },
-  // { date: "30 May", day: "Fri", idx: 6 },
-];
-
-const RESOURCES = [
-  "Computer Lab 1",
-  "Seminar Hall",
-  "Physics Lab",
-  "Smart Classroom 1",
-];
-
-const RESOURCE_DETAILS = {
-  "Computer Lab 1":    { type: "Computer Laboratory", capacity: "40 Students", location: "Block A, Level 2", kind: "Lab",       amenities: "Wi-Fi, Projector, AC" },
-  "Seminar Hall":      { type: "Seminar Hall",         capacity: "80 Students", location: "Block B, Level 1", kind: "Hall",      amenities: "Wi-Fi, Projector, AC, Mic" },
-  "Physics Lab":       { type: "Science Laboratory",   capacity: "30 Students", location: "Block C, Level 2", kind: "Lab",       amenities: "Equipment, AC" },
-  "Smart Classroom 1": { type: "Smart Classroom",      capacity: "60 Students", location: "Block A, Level 3", kind: "Classroom", amenities: "Smart Board, Wi-Fi, AC" },
-};
-
-/* dayIdx 0=Sat … 6=Fri */
-const ALL_EVENTS = [
-  // 25 May Sun
-  { dayIdx: 1, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Sarah Wilson",  activity: "Practical Class" },
-  // 26 May Mon
-  { dayIdx: 2, start: "08:00", end: "10:00", type: "available" },
-  { dayIdx: 2, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Michael Brown", activity: "Lab Session"     },
-  { dayIdx: 2, start: "14:00", end: "16:00", type: "available" },
-  // 27 May Tue
-  { dayIdx: 3, start: "08:00", end: "10:00", type: "pending"   },
-  { dayIdx: 3, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Emily Davis",   activity: "Practical Class" },
-  { dayIdx: 3, start: "14:00", end: "16:00", type: "booked",    name: "Prof. John Smith",  activity: "Workshop"        },
-  // 28 May Wed
-  { dayIdx: 4, start: "09:00", end: "12:00", type: "booked",    name: "Dr. Emily Davis",   activity: "Practical Class" },
-  { dayIdx: 4, start: "13:00", end: "15:00", type: "available" },
-  // 29 May Thu
-  { dayIdx: 5, start: "08:00", end: "10:00", type: "available" },
-  { dayIdx: 5, start: "11:00", end: "13:00", type: "booked",    name: "Dr. David Lee",     activity: "Project Work"    },
-  { dayIdx: 5, start: "15:00", end: "17:00", type: "available" },
-  // 30 May Fri
-  // { dayIdx: 6, start: "10:00", end: "12:00", type: "booked",    name: "Dr. Sarah Wilson",  activity: "Seminar"         },
-  // { dayIdx: 6, start: "14:00", end: "16:00", type: "available" },
+  { lecture: "Lecture - 1", idx: 0 },
+  { lecture: "Lecture - 2", idx: 1 },
+  { lecture: "Lecture - 3", idx: 2 },
+  { lecture: "Lecture - 4", idx: 3 },
+  { lecture: "Lecture - 5", idx: 4 },
+  { lecture: "Lecture - 6", idx: 5 },
 ];
 
 /* ─── Helpers ────────────────────────────────────── */
@@ -77,33 +43,106 @@ function hourLabel(h) {
   return `${String(h12).padStart(2,"0")}:00 ${ampm}`;
 }
 
-/* ─── Sidebar Nav Items ──────────────────────────── */
+/* ─── Nav ────────────────────────────────────────── */
 const NAV = [
-  { label: "Dashboard",        Icon: HomeIcon     },
+  { label: "Dashboard",      Icon: HomeIcon     },
   { label: "Show Resources", Icon: SearchIcon   },
-  { label: "My Requests",      Icon: RequestsIcon },
-  { label: "Profile",          Icon: ProfileIcon  },
-  { label: "Logout",           Icon: LogoutIcon   },
+  { label: "My Requests",    Icon: RequestsIcon },
+  { label: "Profile",        Icon: ProfileIcon  },
+  { label: "Logout",         Icon: LogoutIcon   },
 ];
 
 /* ═══════════════════════════════════════════════════
    MAIN COMPONENT
 ═══════════════════════════════════════════════════ */
-export default function ResourceCalendar() {
-  const navigate  = useNavigate();
-  const [activeNav, setActiveNav]   = useState("Show Resources");
-  const [resource, setResource]     = useState("Computer Lab 1");
-  const [viewMode, setViewMode]     = useState("week"); // "week" | "day"
+export default function ShowResources() {
+  const navigate = useNavigate();
+  const [activeNav,   setActiveNav]   = useState("Show Resources");
+  const [category,    setCategory]    = useState("Labs");
+  const [viewMode,    setViewMode]    = useState("week");
 
-  const details = RESOURCE_DETAILS[resource];
-  const events  = ALL_EVENTS; // in a real app, filter by resource
+  // Data from API
+  const [resources,   setResources]   = useState([]);   // [{resourceId, name, type, ...}]
+  const [selected,    setSelected]    = useState(null);  // currently selected resource object
+  const [timetable,   setTimetable]   = useState([]);   // [{id, lectureIndex, startTime, endTime, facultyName, classType, ...}]
+  const [loading,     setLoading]     = useState(false);
+  const [timetableLoading, setTimetableLoading] = useState(false);
 
-  const handleNav = (item) => {
-    setActiveNav(item.label);
-    if (item.label === "Dashboard") navigate("/faculty-dashboard");
-    if (item.label === "Logout") navigate(item.path);
+  /* ── Fetch resources whenever category changes ── */
+  useEffect(() => {
+    fetchResources(category);
+  }, [category]);
 
+  /* ── Fetch timetable whenever selected resource changes ── */
+  useEffect(() => {
+    if (selected) fetchTimetable(selected.resourceId);
+  }, [selected]);
+
+  // ── paste these two functions replacing old ones ──
+
+  const fetchResources = async (cat) => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API_BASE}/resources/category`, {
+        params: { name: cat }
+      });
+      console.log("DATA:", res.data);   // ← add this
+      const list = res.data;
+      setResources(list);
+      if (list.length > 0) setSelected(list[0]);
+      else { setSelected(null); setTimetable([]); }
+    } catch (err) {
+      console.error("ERROR:", err.response?.data || err.message);  // ← add this
+    } finally {
+      setLoading(false);   // ← this must always run
+    }
+};
+
+  const fetchTimetable = async (resourceId) => {
+    setTimetableLoading(true);
+    try {
+      const res = await axios.get(`${API_BASE}/resources/${resourceId}/timetable`);
+      console.log("Timetable response:", res.data);
+      setTimetable(res.data);
+    } catch (err) {
+      console.error("fetchTimetable error:", err);
+      setTimetable([]);
+    } finally {
+      setTimetableLoading(false);
+    }
   };
+
+  const handleCategoryChange = (cat) => {
+    setCategory(cat);
+    // fetchResources is triggered by useEffect above
+  };
+
+  /* ── Build events for the calendar from timetable ── */
+  // Booked slots come from timetable_entries (already scheduled classes).
+  // We mark remaining slots as "available" for display purposes.
+  const buildEvents = () => {
+    return timetable.map(t => ({
+      dayIdx:   t.lectureIndex,
+      start:    t.startTime,       // "HH:mm"
+      end:      t.endTime,
+      type:     "booked",
+      name:     t.facultyName,
+      activity: t.classType,
+    }));
+  };
+
+  const events = buildEvents();
+
+  const details = selected
+    ? {
+        type:     selected.type,
+        capacity: selected.capacity ? `${selected.capacity} Students` : "N/A",
+        location: selected.location || "N/A",
+        kind:     selected.type,
+        amenities: selected.amenities || "N/A",
+      }
+    : { type: "", capacity: "", location: "", kind: "", amenities: "" };
+
   return (
     <div className="rc-root">
 
@@ -122,9 +161,6 @@ export default function ResourceCalendar() {
                 setActiveNav(label);
                 if (label === "Logout")    navigate("/login");
                 if (label === "Dashboard") navigate("/faculty-dashboard");
-                if (label === "My Requests") navigate("/my-requests");
-                if (label == "Show Resources") navigate("/show-resources");
-
               }}
             >
               <span className="rc-nav-icon"><Icon /></span>
@@ -166,15 +202,43 @@ export default function ResourceCalendar() {
 
         {/* Controls bar */}
         <div className="rc-controls">
+
+          {/* Category filter */}
+          <div className="rc-resource-select-wrap">
+            <label className="rc-control-label">Category</label>
+            <div className="rc-select-box">
+              <select
+                className="rc-select"
+                value={category}
+                onChange={e => handleCategoryChange(e.target.value)}
+              >
+                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+              <ChevronDownIcon />
+            </div>
+          </div>
+
+          <span className="rc-filter-arrow"><ChevronRightIcon /></span>
+
+          {/* Resource filter (populated from API) */}
           <div className="rc-resource-select-wrap">
             <label className="rc-control-label">Resource</label>
             <div className="rc-select-box">
               <select
-                className="rc-select"
-                value={resource}
-                onChange={e => setResource(e.target.value)}
+                className="rc-select rc-select--resource"
+                value={selected?.resourceId ?? ""}
+                onChange={e => {
+                  const picked = resources.find(r => r.resourceId === Number(e.target.value));
+                  if (picked) setSelected(picked);
+                }}
+                disabled={loading}
               >
-                {RESOURCES.map(r => <option key={r}>{r}</option>)}
+                {loading
+                  ? <option>Loading…</option>
+                  : resources.map(r => (
+                      <option key={r.resourceId} value={r.resourceId}>{r.name}</option>
+                    ))
+                }
               </select>
               <ChevronDownIcon />
             </div>
@@ -186,7 +250,7 @@ export default function ResourceCalendar() {
             <button className="rc-nav-arrow"><ChevronRightIcon /></button>
           </div>
 
-          <span className="rc-date-range">24 May – 30 May 2025</span>
+          <span className="rc-date-range">Lecture 1 – Lecture 6</span>
 
           <div className="rc-view-toggle">
             <button
@@ -206,69 +270,71 @@ export default function ResourceCalendar() {
           {/* ── Calendar grid ── */}
           <div className="rc-calendar">
 
-            {/* Day headers */}
+            {/* Lecture headers */}
             <div className="rc-col-headers">
               <div className="rc-time-spacer" />
               {WEEK_DAYS.map(d => (
                 <div key={d.idx} className="rc-col-header">
-                  <span className="rc-col-date">{d.date}</span>
-                  <span className="rc-col-day">{d.day}</span>
+                  <span className="rc-col-date">{d.lecture}</span>
                 </div>
               ))}
             </div>
 
             {/* Scrollable grid */}
             <div className="rc-grid-scroll">
-              <div className="rc-grid-inner">
+              {timetableLoading ? (
+                <div className="rc-loading">Loading schedule…</div>
+              ) : (
+                <div className="rc-grid-inner">
 
-                {/* Time labels */}
-                <div className="rc-time-col">
-                  {HOURS.map(h => (
-                    <div key={h} className="rc-time-cell">
-                      <span className="rc-time-label">{hourLabel(h)}</span>
+                  {/* Time labels */}
+                  <div className="rc-time-col">
+                    {HOURS.map(h => (
+                      <div key={h} className="rc-time-cell">
+                        <span className="rc-time-label">{hourLabel(h)}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Day columns */}
+                  {WEEK_DAYS.map(d => (
+                    <div key={d.idx} className="rc-day-col">
+                      {HOURS.map(h => (
+                        <div key={h} className="rc-hour-line"
+                             style={{ top: `${(h - BASE_HOUR) * HOUR_HEIGHT}px` }} />
+                      ))}
+
+                      {events
+                        .filter(ev => ev.dayIdx === d.idx)
+                        .map((ev, i) => (
+                          <div
+                            key={i}
+                            className={`rc-event rc-event--${ev.type}`}
+                            style={eventStyle(ev.start, ev.end)}
+                          >
+                            <span className="rc-event-time">
+                              {to12h(ev.start)} - {to12h(ev.end)}
+                            </span>
+                            {ev.type === "booked" && (
+                              <>
+                                <span className="rc-event-name">{ev.name}</span>
+                                <span className="rc-event-activity">{ev.activity}</span>
+                              </>
+                            )}
+                            {ev.type === "available" && (
+                              <span className="rc-event-status">Available</span>
+                            )}
+                            {ev.type === "pending" && (
+                              <span className="rc-event-status">Pending</span>
+                            )}
+                          </div>
+                        ))
+                      }
                     </div>
                   ))}
+
                 </div>
-
-                {/* Day columns */}
-                {WEEK_DAYS.map(d => (
-                  <div key={d.idx} className="rc-day-col">
-                    {/* Hour grid lines */}
-                    {HOURS.map(h => (
-                      <div key={h} className="rc-hour-line" style={{ top: `${(h - BASE_HOUR) * HOUR_HEIGHT}px` }} />
-                    ))}
-
-                    {/* Events for this day */}
-                    {events
-                      .filter(ev => ev.dayIdx === d.idx)
-                      .map((ev, i) => (
-                        <div
-                          key={i}
-                          className={`rc-event rc-event--${ev.type}`}
-                          style={eventStyle(ev.start, ev.end)}
-                        >
-                          <span className="rc-event-time">
-                            {to12h(ev.start)} - {to12h(ev.end)}
-                          </span>
-                          {ev.type === "booked" && (
-                            <>
-                              <span className="rc-event-name">{ev.name}</span>
-                              <span className="rc-event-activity">{ev.activity}</span>
-                            </>
-                          )}
-                          {ev.type === "available" && (
-                            <span className="rc-event-status">Available</span>
-                          )}
-                          {ev.type === "pending" && (
-                            <span className="rc-event-status">Pending</span>
-                          )}
-                        </div>
-                      ))
-                    }
-                  </div>
-                ))}
-
-              </div>
+              )}
             </div>
           </div>
 
@@ -279,8 +345,12 @@ export default function ResourceCalendar() {
             <div className="rc-resource-card">
               <div className="rc-resource-card-icon"><MonitorIcon /></div>
               <div>
-                <p className="rc-resource-card-name">{resource}</p>
-                <p className="rc-resource-card-type">{details.type}</p>
+                <p className="rc-resource-card-name">{selected?.name ?? "—"}</p>
+                <p className="rc-resource-card-type">
+                  {selected?.type === "Lab"       && "Computer Laboratory"}
+                  {selected?.type === "Hall"      && "Seminar / Hall"}
+                  {selected?.type === "Classroom" && "Classroom"}
+                </p>
               </div>
             </div>
 
@@ -344,7 +414,7 @@ export default function ResourceCalendar() {
 }
 
 /* ═══════════════════════════════════════════════════
-   SVG ICONS
+   SVG ICONS  (same as original)
 ═══════════════════════════════════════════════════ */
 function GridIcon() {
   return (
@@ -372,31 +442,12 @@ function SearchIcon() {
     </svg>
   );
 }
-function BookingNavIcon() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="4" width="18" height="18" rx="2"/>
-      <line x1="16" y1="2" x2="16" y2="6"/>
-      <line x1="8" y1="2" x2="8" y2="6"/>
-      <line x1="3" y1="10" x2="21" y2="10"/>
-    </svg>
-  );
-}
 function RequestsIcon() {
   return (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
       <circle cx="9" cy="7" r="4"/>
       <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-    </svg>
-  );
-}
-function HistoryIcon() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="12 8 12 12 14 14"/>
-      <path d="M3.05 11a9 9 0 109.95-8.95"/>
-      <polyline points="3 4 3 11 10 11"/>
     </svg>
   );
 }
